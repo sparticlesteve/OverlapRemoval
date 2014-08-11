@@ -83,3 +83,12 @@ bool OverlapRemovalTool::isRejectedObject(const xAOD::IParticle* obj)
   }
   return false;
 }
+
+//-----------------------------------------------------------------------------
+// Set output decoration on object
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::setOutputDecoration(xAOD::IParticle* obj, int pass)
+{
+  static SG::AuxElement::Accessor<int> passAcc(m_outputLabel);
+  passAcc(*obj) = pass;
+}

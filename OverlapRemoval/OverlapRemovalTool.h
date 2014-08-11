@@ -78,6 +78,9 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Check if object has been rejected by decoration
     bool isRejectedObject(const xAOD::IParticle* obj);
 
+    /// Set output decoration on object, pass or fail
+    void setOutputDecoration(xAOD::IParticle* obj, int pass);
+
   private:
 
     /// TODO: add configurable properties for
