@@ -72,17 +72,22 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// which uses the pseudorapidity eta rather than the rapidity y.
     double deltaR(const xAOD::IParticle* p1, const xAOD::IParticle* p2);
 
-    /// TODO: add methods for selecting objects by decoration.
-    /// For example, isSurvivingJet(jet) which will return true if
-    /// the pass decoration is set or if the output decoration is missing.
-    bool isSurvivingObject(const xAOD::IParticle* obj);
+    /// Check if object is flagged as input for OR
+    bool isInputObject(const xAOD::IParticle* obj);
+
+    /// Check if object has been rejected by decoration
+    bool isRejectedObject(const xAOD::IParticle* obj);
 
   private:
 
     /// TODO: add configurable properties for
-    /// - input and output decorations
     /// - OR parameters (dR, etc.)
     /// - OR scheme choices
+
+    /// Input object decoration which specifies which objects to look at
+    std::string m_inputLabel;
+    /// Output object decoration which specifies passing objects
+    std::string m_outputLabel;
 
 }; // class OverlapRemovalTool
 
