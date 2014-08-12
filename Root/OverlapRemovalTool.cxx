@@ -12,7 +12,7 @@ OverlapRemovalTool::OverlapRemovalTool(const std::string& name)
 {
   // declare configurable properties here
   declareProperty("InputLabel", m_inputLabel = "selected");
-  declareProperty("OutputLabel", m_outputLabel = "passOR");
+  declareProperty("OutputLabel", m_outputLabel = "passesOR");
 }
 
 //-----------------------------------------------------------------------------
@@ -29,8 +29,42 @@ StatusCode OverlapRemovalTool::initialize()
 void OverlapRemovalTool::removeEleJetOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::JetContainer* jets)
 {
-  // TODO: remove jets that overlap with electrons in dR < 0.2
-  // TODO: remove electrons that overlap with surviving jets in dR < 0.4
+  // Remove jets that overlap with electrons in dR < 0.2
+  for(const auto jet : *jets){
+    // Check that this jet passes the input selection
+    if(isInputObject(jet)){
+      int jetPass = 1;
+      // Loop over electrons
+      for(const auto electron : *electrons){
+        // Check for overlap
+        // TODO: drop hardcoded cone in favor of member
+        if(isInputObject(electron) && objectsOverlap(electron, jet, 0.2)){
+          jetPass = 0;
+          break;
+        }
+      }
+      setOutputDecoration(jet, jetPass);
+    }
+  }
+  // Remove electrons that overlap with surviving jets in dR < 0.4.
+  // Need two steps so as to avoid using rejected jets.
+  // Maybe this should get its own method.
+  for(const auto electron : *electrons){
+    // Check that this electron passes the input selection
+    if(isInputObject(electron)){
+      int elePass = 1;
+      // Loop over jets
+      for(const auto jet : *jets){
+        // Check for overlap with surviving jets
+        if(isInputObject(jet) && !isRejectedObject(jet) &&
+           objectsOverlap(electron, jet, 0.4)) {
+          elePass = 0;
+          break;
+        }
+      }
+      setOutputDecoration(electron, elePass);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -39,6 +73,7 @@ void OverlapRemovalTool::removeEleJetOverlap
 void OverlapRemovalTool::removeMuonJetOverlap
 (const xAOD::MuonContainer* muons, const xAOD::JetContainer* jets)
 {
+  // TODO: remove muons or jets according to OR prescription
 }
 
 //-----------------------------------------------------------------------------
@@ -48,6 +83,17 @@ void OverlapRemovalTool::removeEleMuonOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::MuonContainer* muons)
 {
   // TODO: remove electrons that share a track with a muon
+}
+
+//-----------------------------------------------------------------------------
+// Check if two objects overlap in a dR window
+//-----------------------------------------------------------------------------
+bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,
+                                        const xAOD::IParticle* p2,
+                                        double dRMax, double dRMin)
+{
+  double dR = deltaR(p1, p2);
+  return (dR < dRMax && dR < dRMin);
 }
 
 //-----------------------------------------------------------------------------
@@ -87,8 +133,9 @@ bool OverlapRemovalTool::isRejectedObject(const xAOD::IParticle* obj)
 //-----------------------------------------------------------------------------
 // Set output decoration on object
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::setOutputDecoration(xAOD::IParticle* obj, int pass)
+void OverlapRemovalTool::setOutputDecoration(const xAOD::IParticle* obj,
+                                             int pass)
 {
-  static SG::AuxElement::Accessor<int> passAcc(m_outputLabel);
+  static SG::AuxElement::Decorator<int> passAcc(m_outputLabel);
   passAcc(*obj) = pass;
 }

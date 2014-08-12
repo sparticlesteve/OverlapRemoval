@@ -62,9 +62,15 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons);
 
+    /// TODO: the other ORs
+
     /// @}
 
   protected:
+
+    /// Determine if objects overlap by a simple dR comparison
+    bool objectsOverlap(const xAOD::IParticle* p1, const xAOD::IParticle* p2,
+                        double dRMax, double dRMin = -1.);
 
     /// Recommended calculation of overlap distance parameter, delta R.
     /// delta R = sqrt((y1-y2)^2 + (phi1-phi2)^2).
@@ -79,7 +85,7 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     bool isRejectedObject(const xAOD::IParticle* obj);
 
     /// Set output decoration on object, pass or fail
-    void setOutputDecoration(xAOD::IParticle* obj, int pass);
+    void setOutputDecoration(const xAOD::IParticle* obj, int pass);
 
   private:
 
