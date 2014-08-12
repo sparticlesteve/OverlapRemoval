@@ -18,7 +18,19 @@ class IOverlapRemovalTool : public virtual asg::IAsgTool
 
   public:
 
-    // overlap interface methods go here
+    /// Remove overlapping electrons and jets.
+    /// This method will decorate both the electrons and jets according to
+    /// both the e-jet and jet-e overlap removal prescriptions
+    virtual void removeEleJetOverlap(const xAOD::ElectronContainer* electrons,
+                                     const xAOD::JetContainer* jets) = 0;
+
+    /// Remove overlapping muons and jets
+    virtual void removeMuonJetOverlap(const xAOD::MuonContainer* muons,
+                                      const xAOD::JetContainer* jets) = 0;
+
+    /// Remove overlapping electrons and muons
+    virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
+                                      const xAOD::MuonContainer* muons) = 0;
 
 }; // class IOverlapRemovalTool
 
