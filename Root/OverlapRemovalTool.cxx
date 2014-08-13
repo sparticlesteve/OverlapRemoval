@@ -25,6 +25,7 @@ StatusCode OverlapRemovalTool::initialize()
 
 //-----------------------------------------------------------------------------
 // Remove overlapping electrons and jets
+// Need two steps so as to avoid using rejected jets in the 2nd step.
 //-----------------------------------------------------------------------------
 void OverlapRemovalTool::removeEleJetOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::JetContainer* jets)
@@ -47,7 +48,6 @@ void OverlapRemovalTool::removeEleJetOverlap
     }
   }
   // Remove electrons that overlap with surviving jets in dR < 0.4.
-  // Need two steps so as to avoid using rejected jets.
   // Maybe this should get its own method.
   for(const auto electron : *electrons){
     // Check that this electron passes the input selection
@@ -68,6 +68,8 @@ void OverlapRemovalTool::removeEleJetOverlap
 
 //-----------------------------------------------------------------------------
 // Remove overlapping muons and jets
+// Note that because of the numTrack requirement on the jet,
+// we are able to do this in just one double loop, unlike ele-jet.
 //-----------------------------------------------------------------------------
 void OverlapRemovalTool::removeMuonJetOverlap
 (const xAOD::MuonContainer* muons, const xAOD::JetContainer* jets)
@@ -78,7 +80,6 @@ void OverlapRemovalTool::removeMuonJetOverlap
 
   // Loop over jets
   for(const auto jet : *jets){
-    // Check that this jet is still OK
     if(isSurvivingObject(jet)){
       int nTrk = nTrkAcc(*jet);
       // Loop over muons
@@ -108,7 +109,24 @@ void OverlapRemovalTool::removeMuonJetOverlap
 void OverlapRemovalTool::removeEleMuonOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::MuonContainer* muons)
 {
-  // TODO: remove electrons that share a track with a muon
+  // Loop over electrons
+  for(const auto electron : *electrons){
+    if(isSurvivingObject(electron)){
+      int elePass = 1;
+      const xAOD::TrackParticle* elTrk = electron->trackParticle();
+      // Loop over muons
+      for(const auto muon : *muons){
+        const xAOD::TrackParticle* muTrk =
+          muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        // Discard electron if they share an ID track
+        if(isSurvivingObject(muon) && (elTrk == muTrk)){
+          elePass = 0;
+          break;
+        }
+      }
+      setOutputDecoration(electron, elePass);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
