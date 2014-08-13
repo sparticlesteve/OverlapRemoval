@@ -84,14 +84,26 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Check if object has been rejected by decoration
     bool isRejectedObject(const xAOD::IParticle* obj);
 
+    /// Check if object is surviving OR thus far
+    bool isSurvivingObject(const xAOD::IParticle* obj)
+    { return isInputObject(obj) && !isRejectedObject(obj); }
+
     /// Set output decoration on object, pass or fail
     void setOutputDecoration(const xAOD::IParticle* obj, int pass);
+
+    /// Shorthand way to set an object as pass
+    void setObjectPass(const xAOD::IParticle* obj)
+    { setOutputDecoration(obj, 1); }
+
+    /// Shorthand way to set an object as fail
+    void setObjectFail(const xAOD::IParticle* obj)
+    { setOutputDecoration(obj, 0); }
 
   private:
 
     /// TODO: add configurable properties for
-    /// - OR parameters (dR, etc.)
-    /// - OR scheme choices
+    /// - all OR parameters (dR, etc.)
+    /// - all OR scheme choices
 
     /// Input object decoration which specifies which objects to look at
     std::string m_inputLabel;

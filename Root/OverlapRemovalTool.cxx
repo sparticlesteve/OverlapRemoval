@@ -32,13 +32,13 @@ void OverlapRemovalTool::removeEleJetOverlap
   // Remove jets that overlap with electrons in dR < 0.2
   for(const auto jet : *jets){
     // Check that this jet passes the input selection
-    if(isInputObject(jet)){
+    if(isSurvivingObject(jet)){
       int jetPass = 1;
       // Loop over electrons
       for(const auto electron : *electrons){
         // Check for overlap
         // TODO: drop hardcoded cone in favor of member
-        if(isInputObject(electron) && objectsOverlap(electron, jet, 0.2)){
+        if(isSurvivingObject(electron) && objectsOverlap(electron, jet, 0.2)){
           jetPass = 0;
           break;
         }
@@ -51,13 +51,12 @@ void OverlapRemovalTool::removeEleJetOverlap
   // Maybe this should get its own method.
   for(const auto electron : *electrons){
     // Check that this electron passes the input selection
-    if(isInputObject(electron)){
+    if(isSurvivingObject(electron)){
       int elePass = 1;
       // Loop over jets
       for(const auto jet : *jets){
         // Check for overlap with surviving jets
-        if(isInputObject(jet) && !isRejectedObject(jet) &&
-           objectsOverlap(electron, jet, 0.4)) {
+        if(isSurvivingObject(jet) && objectsOverlap(electron, jet, 0.4)) {
           elePass = 0;
           break;
         }
@@ -73,7 +72,34 @@ void OverlapRemovalTool::removeEleJetOverlap
 void OverlapRemovalTool::removeMuonJetOverlap
 (const xAOD::MuonContainer* muons, const xAOD::JetContainer* jets)
 {
-  // TODO: remove muons or jets according to OR prescription
+  // Accessor to jet.nTrack
+  // TODO: figure out the correct aux key
+  static SG::AuxElement::ConstAccessor<int> nTrkAcc("numTracks");
+
+  // Loop over jets
+  for(const auto jet : *jets){
+    // Check that this jet is still OK
+    if(isSurvivingObject(jet)){
+      int nTrk = nTrkAcc(*jet);
+      // Loop over muons
+      for(const auto muon : *muons){
+        // Check for overlap
+        if(isSurvivingObject(muon) && objectsOverlap(jet, muon, 0.4)){
+          // Toss muon
+          if(nTrk > 2){
+            setObjectFail(muon);
+            setObjectPass(jet);
+          }
+          // Toss jet
+          else{
+            setObjectFail(jet);
+            setObjectPass(muon);
+            break;
+          }
+        } // objects overlap
+      } // muon loop
+    } // is surviving jet
+  } // jet loop
 }
 
 //-----------------------------------------------------------------------------
