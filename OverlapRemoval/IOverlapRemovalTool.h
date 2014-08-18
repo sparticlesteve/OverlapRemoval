@@ -32,6 +32,10 @@ class IOverlapRemovalTool : public virtual asg::IAsgTool
     virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons) = 0;
 
+    /// Remove jets overlapping with taus
+    virtual void removeTauJetOverlap(const xAOD::TauJetContainer* taus,
+                                     const xAOD::JetContainer* jets) = 0;
+
 }; // class IOverlapRemovalTool
 
 #endif

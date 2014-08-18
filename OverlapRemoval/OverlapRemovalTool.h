@@ -9,6 +9,7 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
 
 // Local includes
 #include "OverlapRemoval/IOverlapRemovalTool.h"
@@ -61,6 +62,10 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// return value should just be a bool.
     virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons);
+
+    /// Remove jets overlapping with taus
+    virtual void removeTauJetOverlap(const xAOD::TauJetContainer* taus,
+                                     const xAOD::JetContainer* jets);
 
     /// TODO: the other ORs
 

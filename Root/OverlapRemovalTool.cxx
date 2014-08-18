@@ -130,6 +130,30 @@ void OverlapRemovalTool::removeEleMuonOverlap
 }
 
 //-----------------------------------------------------------------------------
+// Remove overlapping hadronic taus and jets
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
+                                             const xAOD::JetContainer* jets)
+{
+  // Loop over jets
+  for(const auto jet : *jets){
+    // Check that this jet passes the input selection
+    if(isSurvivingObject(jet)){
+      int jetPass = 1;
+      // Loop over taus
+      for(const auto tau : *taus){
+        // Check for overlap
+        if(isSurvivingObject(tau) && objectsOverlap(tau, jet, 0.2)){
+          jetPass = 0;
+          break;
+        }
+      }
+      setOutputDecoration(jet, jetPass);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 // Check if two objects overlap in a dR window
 //-----------------------------------------------------------------------------
 bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,
