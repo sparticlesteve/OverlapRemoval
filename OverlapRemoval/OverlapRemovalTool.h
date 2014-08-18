@@ -67,7 +67,15 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     virtual void removeTauJetOverlap(const xAOD::TauJetContainer* taus,
                                      const xAOD::JetContainer* jets);
 
-    /// TODO: the other ORs
+    /// Remove overlapping taus and electrons
+    virtual void removeTauEleOverlap(const xAOD::TauJetContainer* taus,
+                                     const xAOD::ElectronContainer* electrons);
+
+    /// Remove overlapping taus and muons
+    virtual void removeTauMuonOverlap(const xAOD::TauJetContainer* taus,
+                                      const xAOD::MuonContainer* muons);
+
+    /// TODO: the other ORs and high-level logic (ordering of ops)
 
     /// @}
 

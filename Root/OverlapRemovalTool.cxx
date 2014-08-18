@@ -154,6 +154,56 @@ void OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
 }
 
 //-----------------------------------------------------------------------------
+// Remove overlapping hadronic taus and electrons
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removeTauEleOverlap
+(const xAOD::TauJetContainer* taus, const xAOD::ElectronContainer* electrons)
+{
+  // Remove tau if overlaps with a VeryLooseLLH electron in dR < 0.2
+  for(const auto tau : *taus){
+    if(isSurvivingObject(tau)){
+      int tauPass = 1;
+      for(const auto electron : *electrons){
+        if(isSurvivingObject(electron)){
+          // TODO: use faster method. This is slow.
+          // TODO: check ID string
+          bool passID = false;
+          electron->passSelection(passID, "VeryLooseLH");
+          if(passID && objectsOverlap(tau, electron, 0.2)){
+            tauPass = 0;
+            break;
+          } // electron overlaps
+        } // is surviving electron
+      } // electron loop
+      setOutputDecoration(tau, tauPass);
+    } // is surviving tau
+  } // tau loop
+}
+
+//-----------------------------------------------------------------------------
+// Remove overlapping hadronic taus and muons
+// This function loop could be combined with the electron one above for speed.
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removeTauMuonOverlap
+(const xAOD::TauJetContainer* taus, const xAOD::MuonContainer* muons)
+{
+  // Remove tau if overlaps with a muon in dR < 0.2
+  for(const auto tau : *taus){
+    if(isSurvivingObject(tau)){
+      int tauPass = 1;
+      for(const auto muon : *muons){
+        // No specific criteria on this muon?
+        if(isSurvivingObject(muon) && objectsOverlap(tau, muon, 0.2)){
+          tauPass = 0;
+          break;
+        } // muon overlaps
+      } // muon loop
+      setOutputDecoration(tau, tauPass);
+    } // is surviving tau
+  } // tau loop
+}
+
+//-----------------------------------------------------------------------------
 // Check if two objects overlap in a dR window
 //-----------------------------------------------------------------------------
 bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,
