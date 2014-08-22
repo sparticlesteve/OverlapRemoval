@@ -81,6 +81,22 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
 
   protected:
 
+    /// Generic dR-based overlap check between one object and a container.
+    /// NOTE: this doesn't have any check that the objects are equal.
+    /// TODO: decide if generic overlap function is worth it.
+    template<typename ContainerType> bool objectOverlaps
+    (const xAOD::IParticle* obj, const ContainerType* container, double dR)
+    {
+      for(const auto contObj : *container){
+        if(isSurvivingObject(contObj)){
+          // Make sure these are not the same object
+          if(obj == contObj) continue;
+          if(objectsOverlap(obj, contObj, dR)) return true;
+        }
+      }
+      return false;
+    }
+
     /// Determine if objects overlap by a simple dR comparison
     bool objectsOverlap(const xAOD::IParticle* p1, const xAOD::IParticle* p2,
                         double dRMax, double dRMin = -1.);
