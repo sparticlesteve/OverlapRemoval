@@ -34,6 +34,7 @@ void OverlapRemovalTool::removeEleJetOverlap
   for(const auto jet : *jets){
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
+      // TODO: migrate to generic overlap method here?
       int jetPass = 1;
       // Loop over electrons
       for(const auto electron : *electrons){
@@ -52,6 +53,7 @@ void OverlapRemovalTool::removeEleJetOverlap
   for(const auto electron : *electrons){
     // Check that this electron passes the input selection
     if(isSurvivingObject(electron)){
+      // TODO: migrate to generic overlap method here?
       int elePass = 1;
       // Loop over jets
       for(const auto jet : *jets){
@@ -82,6 +84,7 @@ void OverlapRemovalTool::removeMuonJetOverlap
   for(const auto jet : *jets){
     if(isSurvivingObject(jet)){
       int nTrk = nTrkAcc(*jet);
+      // TODO: migrate to generic overlap method here?
       // Loop over muons
       for(const auto muon : *muons){
         // Check for overlap
@@ -139,6 +142,7 @@ void OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
   for(const auto jet : *jets){
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
+      // TODO: migrate to generic overlap method here?
       int jetPass = 1;
       // Loop over taus
       for(const auto tau : *taus){
@@ -190,6 +194,7 @@ void OverlapRemovalTool::removeTauMuonOverlap
   // Remove tau if overlaps with a muon in dR < 0.2
   for(const auto tau : *taus){
     if(isSurvivingObject(tau)){
+      // TODO: migrate to generic overlap method here?
       int tauPass = 1;
       for(const auto muon : *muons){
         // No specific criteria on this muon?
@@ -201,6 +206,58 @@ void OverlapRemovalTool::removeTauMuonOverlap
       setOutputDecoration(tau, tauPass);
     } // is surviving tau
   } // tau loop
+}
+
+//-----------------------------------------------------------------------------
+// Remove overlapping photons and electrons
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removePhotonEleOverlap
+(const xAOD::PhotonContainer* photons, const xAOD::ElectronContainer* electrons)
+{
+  for(const auto photon : *photons){
+    if(isSurvivingObject(photon)){
+      // This generic template method makes the code concise,
+      // but is it now overly complicated? Need to decide.
+      if(objectOverlaps<xAOD::ElectronContainer>(photon, electrons, 0.4))
+        setObjectFail(photon);
+      else setObjectPass(photon);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Remove overlapping photons and muons
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removePhotonMuonOverlap
+(const xAOD::PhotonContainer* photons, const xAOD::MuonContainer* muons)
+{
+  for(const auto photon : *photons){
+    if(isSurvivingObject(photon)){
+      // This generic template method makes the code concise,
+      // but is it now overly complicated? Need to decide.
+      if(objectOverlaps<xAOD::MuonContainer>(photon, muons, 0.4))
+        setObjectFail(photon);
+      else setObjectPass(photon);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Remove overlapping photons and electrons
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removePhotonPhotonOverlap
+(const xAOD::PhotonContainer* photons)
+{
+  for(const auto photon : *photons){
+    if(isSurvivingObject(photon)){
+      // This generic template method makes the code concise,
+      // but is it now overly complicated? Need to decide.
+      // TODO: what is the correct overlap cone here?
+      if(objectOverlaps<xAOD::PhotonContainer>(photon, photons, 0.4))
+        setObjectFail(photon);
+      else setObjectPass(photon);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------

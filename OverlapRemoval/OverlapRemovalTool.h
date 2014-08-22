@@ -7,6 +7,7 @@
 // EDM includes
 #include "xAODBase/IParticle.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTau/TauJetContainer.h"
@@ -58,8 +59,8 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
                                       const xAOD::JetContainer* jets);
 
     /// Remove overlapping electrons and muons
-    /// TODO: make it possible to veto event based on this. Maybe the
-    /// return value should just be a bool.
+    /// TODO: make it possible to veto event based on this.
+    /// Maybe the return value should just be a bool.
     virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons);
 
@@ -75,7 +76,18 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     virtual void removeTauMuonOverlap(const xAOD::TauJetContainer* taus,
                                       const xAOD::MuonContainer* muons);
 
-    /// TODO: the other ORs and high-level logic (ordering of ops)
+    /// Remove overlapping photons and electrons
+    virtual void removePhotonEleOverlap(const xAOD::PhotonContainer* photons,
+                                        const xAOD::ElectronContainer* electrons);
+
+    /// Remove overlapping photons and muons
+    virtual void removePhotonMuonOverlap(const xAOD::PhotonContainer* photons,
+                                         const xAOD::MuonContainer* muons);
+
+    /// Remove overlapping photons
+    virtual void removePhotonPhotonOverlap(const xAOD::PhotonContainer* photons);
+
+    /// TODO: add the high-level overlap removal logic
 
     /// @}
 
