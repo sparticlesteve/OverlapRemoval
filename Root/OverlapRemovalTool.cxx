@@ -261,6 +261,23 @@ void OverlapRemovalTool::removePhotonPhotonOverlap
 }
 
 //-----------------------------------------------------------------------------
+// Remove overlapping photons and jets
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removePhotonJetOverlap
+(const xAOD::PhotonContainer* photons, const xAOD::JetContainer* jets)
+{
+  for(const auto jet : *jets){
+    if(isSurvivingObject(jet)){
+      // This generic template method makes the code concise,
+      // but is it now overly complicated? Need to decide.
+      if(objectOverlaps<xAOD::PhotonContainer>(jet, photons, 0.4))
+        setObjectFail(jet);
+      else setObjectPass(jet);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 // Check if two objects overlap in a dR window
 //-----------------------------------------------------------------------------
 bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,

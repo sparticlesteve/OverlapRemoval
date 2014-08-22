@@ -87,6 +87,10 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Remove overlapping photons
     virtual void removePhotonPhotonOverlap(const xAOD::PhotonContainer* photons);
 
+    /// Remove overlapping photons and jets
+    virtual void removePhotonJetOverlap(const xAOD::PhotonContainer* photons,
+                                        const xAOD::JetContainer* jets);
+
     /// TODO: add the high-level overlap removal logic
 
     /// @}
