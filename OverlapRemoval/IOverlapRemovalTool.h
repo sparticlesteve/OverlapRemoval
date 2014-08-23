@@ -44,6 +44,21 @@ class IOverlapRemovalTool : public virtual asg::IAsgTool
     virtual void removeTauMuonOverlap(const xAOD::TauJetContainer* taus,
                                       const xAOD::MuonContainer* muons) = 0;
 
+    /// Remove overlapping photons and electrons
+    virtual void removePhotonEleOverlap(const xAOD::PhotonContainer* photons,
+                                        const xAOD::ElectronContainer* electrons) = 0;
+
+    /// Remove overlapping photons and muons
+    virtual void removePhotonMuonOverlap(const xAOD::PhotonContainer* photons,
+                                         const xAOD::MuonContainer* muons) = 0;
+
+    /// Remove overlapping photons
+    virtual void removePhotonPhotonOverlap(const xAOD::PhotonContainer* photons) = 0;
+
+    /// Remove overlapping photons and jets
+    virtual void removePhotonJetOverlap(const xAOD::PhotonContainer* photons,
+                                        const xAOD::JetContainer* jets) = 0;
+
 }; // class IOverlapRemovalTool
 
 #endif
