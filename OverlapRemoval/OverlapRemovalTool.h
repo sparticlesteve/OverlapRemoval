@@ -48,6 +48,16 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// @name Methods implementing the IOverlapRemovalTool interface
     /// @{
 
+    /// Top-level method for performing full overlap-removal
+    /// It might be best to specify input containers by TStore key,
+    /// but it's not clear how that will work for systematic variations.
+    /// Consider this explicit approach a placeholder, for now.
+    virtual void removeOverlaps(const xAOD::ElectronContainer* electrons,
+                                const xAOD::MuonContainer* muons,
+                                const xAOD::JetContainer* jets,
+                                const xAOD::TauJetContainer* taus = 0,
+                                const xAOD::PhotonContainer* photons = 0);
+
     /// Remove overlapping electrons and jets
     /// This method will decorate both the electrons and jets according to
     /// both the e-jet and jet-e overlap removal prescriptions.

@@ -24,6 +24,47 @@ StatusCode OverlapRemovalTool::initialize()
 }
 
 //-----------------------------------------------------------------------------
+// Remove all overlapping objects according to the official
+// harmonization prescription
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::removeOverlaps(const xAOD::ElectronContainer* electrons,
+                                        const xAOD::MuonContainer* muons,
+                                        const xAOD::JetContainer* jets,
+                                        const xAOD::TauJetContainer* taus,
+                                        const xAOD::PhotonContainer* photons)
+{
+  /*
+    Recommended removal sequence
+
+    1. Tau ID and OR with specific loose electrons and muons
+    2. ID and isolation of electrons and muons
+    3. e-µ OR
+    4. lep-photon OR
+    5. lep/photon - jet OR
+  */
+
+  // Tau and loose ele/mu OR
+  if(taus){
+    removeTauEleOverlap(taus, electrons);
+    removeTauMuonOverlap(taus, muons);
+  }
+  // e-mu OR
+  removeEleMuonOverlap(electrons, muons);
+  // photon and e/mu OR
+  // TODO: where does photon-photon fit in?
+  if(photons){
+    removePhotonPhotonOverlap(photons);
+    removePhotonEleOverlap(photons, electrons);
+    removePhotonMuonOverlap(photons, muons);
+  }
+  // lep/photon and jet OR
+  removeEleJetOverlap(electrons, jets);
+  removeMuonJetOverlap(muons, jets);
+  if(photons) removePhotonJetOverlap(photons, jets);
+
+}
+
+//-----------------------------------------------------------------------------
 // Remove overlapping electrons and jets
 // Need two steps so as to avoid using rejected jets in the 2nd step.
 //-----------------------------------------------------------------------------
