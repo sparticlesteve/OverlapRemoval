@@ -345,6 +345,8 @@ double OverlapRemovalTool::deltaR(const xAOD::IParticle* p1,
 //-----------------------------------------------------------------------------
 bool OverlapRemovalTool::isInputObject(const xAOD::IParticle* obj)
 {
+  // Input label is turned off if empty string
+  if(m_inputLabel.empty()) return true;
   static SG::AuxElement::ConstAccessor<int> inputAcc(m_inputLabel);
   return inputAcc(*obj);
 }
