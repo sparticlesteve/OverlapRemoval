@@ -18,10 +18,9 @@ class IOverlapRemovalTool : public virtual asg::IAsgTool
 
   public:
 
-    /// Top-level method for performing full overlap-removal
-    /// It might be best to specify input containers by TStore key,
-    /// but it's not clear how that will work for systematic variations.
-    /// Consider this explicit approach a placeholder, for now.
+    /// Top-level method for performing full overlap-removal.
+    /// the individual OR methods will be called in the recommended order,
+    /// and the considered objects will be decorated with the output result.
     virtual StatusCode removeOverlaps(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons,
                                       const xAOD::JetContainer* jets,
