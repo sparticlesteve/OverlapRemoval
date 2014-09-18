@@ -127,10 +127,12 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     bool objectsOverlap(const xAOD::IParticle* p1, const xAOD::IParticle* p2,
                         double dRMax, double dRMin = -1.);
 
-    /// Recommended calculation of overlap distance parameter, delta R.
-    /// delta R = sqrt((y1-y2)^2 + (phi1-phi2)^2).
-    /// This is in contrast to what is returned by TLorentzVector::DeltaR,
-    /// which uses the pseudorapidity eta rather than the rapidity y.
+    /// Recommended calculation of overlap distance parameter, (delta R)^2.
+    /// dR^2 = (y1-y2)^2 + (phi1-phi2)^2
+    /// Note this is calculated with the rapidity rather than the
+    /// pseudorapidity. TLorentzVector::DeltaR uses the latter.
+    double deltaR2(const xAOD::IParticle* p1, const xAOD::IParticle* p2);
+    /// deltaR = sqrt( deltaR2 )
     double deltaR(const xAOD::IParticle* p1, const xAOD::IParticle* p2);
 
     /// Check if object is flagged as input for OR

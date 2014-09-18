@@ -62,7 +62,7 @@ removeOverlaps(const xAOD::ElectronContainer* electrons,
   ATH_CHECK( removeEleJetOverlap(electrons, jets) );
   ATH_CHECK( removeMuonJetOverlap(muons, jets) );
   if(photons) ATH_CHECK( removePhotonJetOverlap(photons, jets) );
-
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -336,20 +336,24 @@ bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,
                                         const xAOD::IParticle* p2,
                                         double dRMax, double dRMin)
 {
-  double dR = deltaR(p1, p2);
-  return (dR < dRMax && dR < dRMin);
+  double dR2 = deltaR2(p1, p2);
+  // TODO: use fpcompare utilities
+  return (dR2 < (dRMax*dRMax) && dR2 < (dRMin*dRMin));
 }
 
 //-----------------------------------------------------------------------------
 // Calculate delta R between two particles
 //-----------------------------------------------------------------------------
-double OverlapRemovalTool::deltaR(const xAOD::IParticle* p1,
-                                  const xAOD::IParticle* p2)
+double OverlapRemovalTool::deltaR2(const xAOD::IParticle* p1,
+                                   const xAOD::IParticle* p2)
 {
   double dY = p1->rapidity() - p2->rapidity();
   double dPhi = TVector2::Phi_mpi_pi(p1->phi() - p2->phi());
-  return sqrt(dY*dY + dPhi*dPhi);
+  return dY*dY + dPhi*dPhi;
 }
+double OverlapRemovalTool::deltaR(const xAOD::IParticle* p1,
+                                  const xAOD::IParticle* p2)
+{ return sqrt(deltaR2(p1, p2)); }
 
 //-----------------------------------------------------------------------------
 // Determine if object is currently OK for input to OR
