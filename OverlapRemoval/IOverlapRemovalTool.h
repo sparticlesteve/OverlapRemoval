@@ -22,52 +22,52 @@ class IOverlapRemovalTool : public virtual asg::IAsgTool
     /// It might be best to specify input containers by TStore key,
     /// but it's not clear how that will work for systematic variations.
     /// Consider this explicit approach a placeholder, for now.
-    virtual void removeOverlaps(const xAOD::ElectronContainer* electrons,
-                                const xAOD::MuonContainer* muons,
-                                const xAOD::JetContainer* jets,
-                                const xAOD::TauJetContainer* taus = 0,
-                                const xAOD::PhotonContainer* photons = 0) = 0;
+    virtual StatusCode removeOverlaps(const xAOD::ElectronContainer* electrons,
+                                      const xAOD::MuonContainer* muons,
+                                      const xAOD::JetContainer* jets,
+                                      const xAOD::TauJetContainer* taus = 0,
+                                      const xAOD::PhotonContainer* photons = 0) = 0;
 
     /// Remove overlapping electrons and jets.
     /// This method will decorate both the electrons and jets according to
     /// both the e-jet and jet-e overlap removal prescriptions
-    virtual void removeEleJetOverlap(const xAOD::ElectronContainer* electrons,
-                                     const xAOD::JetContainer* jets) = 0;
+    virtual StatusCode removeEleJetOverlap(const xAOD::ElectronContainer* electrons,
+                                           const xAOD::JetContainer* jets) = 0;
 
     /// Remove overlapping muons and jets
-    virtual void removeMuonJetOverlap(const xAOD::MuonContainer* muons,
-                                      const xAOD::JetContainer* jets) = 0;
+    virtual StatusCode removeMuonJetOverlap(const xAOD::MuonContainer* muons,
+                                            const xAOD::JetContainer* jets) = 0;
 
     /// Remove overlapping electrons and muons
-    virtual void removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
-                                      const xAOD::MuonContainer* muons) = 0;
+    virtual StatusCode removeEleMuonOverlap(const xAOD::ElectronContainer* electrons,
+                                            const xAOD::MuonContainer* muons) = 0;
 
     /// Remove jets overlapping with taus
-    virtual void removeTauJetOverlap(const xAOD::TauJetContainer* taus,
-                                     const xAOD::JetContainer* jets) = 0;
+    virtual StatusCode removeTauJetOverlap(const xAOD::TauJetContainer* taus,
+                                           const xAOD::JetContainer* jets) = 0;
 
     /// Remove overlapping taus and electrons
-    virtual void removeTauEleOverlap(const xAOD::TauJetContainer* taus,
-                                     const xAOD::ElectronContainer* electrons) = 0;
+    virtual StatusCode removeTauEleOverlap(const xAOD::TauJetContainer* taus,
+                                           const xAOD::ElectronContainer* electrons) = 0;
 
     /// Remove overlapping taus and muons
-    virtual void removeTauMuonOverlap(const xAOD::TauJetContainer* taus,
-                                      const xAOD::MuonContainer* muons) = 0;
+    virtual StatusCode removeTauMuonOverlap(const xAOD::TauJetContainer* taus,
+                                            const xAOD::MuonContainer* muons) = 0;
 
     /// Remove overlapping photons and electrons
-    virtual void removePhotonEleOverlap(const xAOD::PhotonContainer* photons,
-                                        const xAOD::ElectronContainer* electrons) = 0;
+    virtual StatusCode removePhotonEleOverlap(const xAOD::PhotonContainer* photons,
+                                              const xAOD::ElectronContainer* electrons) = 0;
 
     /// Remove overlapping photons and muons
-    virtual void removePhotonMuonOverlap(const xAOD::PhotonContainer* photons,
-                                         const xAOD::MuonContainer* muons) = 0;
+    virtual StatusCode removePhotonMuonOverlap(const xAOD::PhotonContainer* photons,
+                                               const xAOD::MuonContainer* muons) = 0;
 
     /// Remove overlapping photons
-    virtual void removePhotonPhotonOverlap(const xAOD::PhotonContainer* photons) = 0;
+    virtual StatusCode removePhotonPhotonOverlap(const xAOD::PhotonContainer* photons) = 0;
 
     /// Remove overlapping photons and jets
-    virtual void removePhotonJetOverlap(const xAOD::PhotonContainer* photons,
-                                        const xAOD::JetContainer* jets) = 0;
+    virtual StatusCode removePhotonJetOverlap(const xAOD::PhotonContainer* photons,
+                                              const xAOD::JetContainer* jets) = 0;
 
 }; // class IOverlapRemovalTool
 
