@@ -338,7 +338,7 @@ bool OverlapRemovalTool::objectsOverlap(const xAOD::IParticle* p1,
 {
   double dR2 = deltaR2(p1, p2);
   // TODO: use fpcompare utilities
-  return (dR2 < (dRMax*dRMax) && dR2 < (dRMin*dRMin));
+  return (dR2 < (dRMax*dRMax) && dR2 > (dRMin*dRMin));
 }
 
 //-----------------------------------------------------------------------------
