@@ -27,11 +27,12 @@ StatusCode OverlapRemovalTool::initialize()
 // Remove all overlapping objects according to the official
 // harmonization prescription
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeOverlaps(const xAOD::ElectronContainer* electrons,
-                                        const xAOD::MuonContainer* muons,
-                                        const xAOD::JetContainer* jets,
-                                        const xAOD::TauJetContainer* taus,
-                                        const xAOD::PhotonContainer* photons)
+StatusCode OverlapRemovalTool::
+removeOverlaps(const xAOD::ElectronContainer* electrons,
+               const xAOD::MuonContainer* muons,
+               const xAOD::JetContainer* jets,
+               const xAOD::TauJetContainer* taus,
+               const xAOD::PhotonContainer* photons)
 {
   /*
     Recommended removal sequence
@@ -45,22 +46,22 @@ void OverlapRemovalTool::removeOverlaps(const xAOD::ElectronContainer* electrons
 
   // Tau and loose ele/mu OR
   if(taus){
-    removeTauEleOverlap(taus, electrons);
-    removeTauMuonOverlap(taus, muons);
+    ATH_CHECK( removeTauEleOverlap(taus, electrons) );
+    ATH_CHECK( removeTauMuonOverlap(taus, muons) );
   }
   // e-mu OR
-  removeEleMuonOverlap(electrons, muons);
+  ATH_CHECK( removeEleMuonOverlap(electrons, muons) );
   // photon and e/mu OR
   // TODO: where does photon-photon fit in?
   if(photons){
-    removePhotonPhotonOverlap(photons);
-    removePhotonEleOverlap(photons, electrons);
-    removePhotonMuonOverlap(photons, muons);
+    ATH_CHECK( removePhotonPhotonOverlap(photons) );
+    ATH_CHECK( removePhotonEleOverlap(photons, electrons) );
+    ATH_CHECK( removePhotonMuonOverlap(photons, muons) );
   }
   // lep/photon and jet OR
-  removeEleJetOverlap(electrons, jets);
-  removeMuonJetOverlap(muons, jets);
-  if(photons) removePhotonJetOverlap(photons, jets);
+  ATH_CHECK( removeEleJetOverlap(electrons, jets) );
+  ATH_CHECK( removeMuonJetOverlap(muons, jets) );
+  if(photons) ATH_CHECK( removePhotonJetOverlap(photons, jets) );
 
 }
 
@@ -68,7 +69,7 @@ void OverlapRemovalTool::removeOverlaps(const xAOD::ElectronContainer* electrons
 // Remove overlapping electrons and jets
 // Need two steps so as to avoid using rejected jets in the 2nd step.
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeEleJetOverlap
+StatusCode OverlapRemovalTool::removeEleJetOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::JetContainer* jets)
 {
   // Remove jets that overlap with electrons in dR < 0.2
@@ -107,6 +108,7 @@ void OverlapRemovalTool::removeEleJetOverlap
       setOutputDecoration(electron, elePass);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -114,7 +116,7 @@ void OverlapRemovalTool::removeEleJetOverlap
 // Note that because of the numTrack requirement on the jet,
 // we are able to do this in just one double loop, unlike ele-jet.
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeMuonJetOverlap
+StatusCode OverlapRemovalTool::removeMuonJetOverlap
 (const xAOD::MuonContainer* muons, const xAOD::JetContainer* jets)
 {
   // Accessor to jet.nTrack
@@ -145,12 +147,13 @@ void OverlapRemovalTool::removeMuonJetOverlap
       } // muon loop
     } // is surviving jet
   } // jet loop
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping electrons and muons
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeEleMuonOverlap
+StatusCode OverlapRemovalTool::removeEleMuonOverlap
 (const xAOD::ElectronContainer* electrons, const xAOD::MuonContainer* muons)
 {
   // Loop over electrons
@@ -171,13 +174,14 @@ void OverlapRemovalTool::removeEleMuonOverlap
       setOutputDecoration(electron, elePass);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping hadronic taus and jets
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
-                                             const xAOD::JetContainer* jets)
+StatusCode OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
+                                                   const xAOD::JetContainer* jets)
 {
   // Loop over jets
   for(const auto jet : *jets){
@@ -196,12 +200,13 @@ void OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* taus,
       setOutputDecoration(jet, jetPass);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping hadronic taus and electrons
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeTauEleOverlap
+StatusCode OverlapRemovalTool::removeTauEleOverlap
 (const xAOD::TauJetContainer* taus, const xAOD::ElectronContainer* electrons)
 {
   // Remove tau if overlaps with a VeryLooseLLH electron in dR < 0.2
@@ -223,13 +228,14 @@ void OverlapRemovalTool::removeTauEleOverlap
       setOutputDecoration(tau, tauPass);
     } // is surviving tau
   } // tau loop
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping hadronic taus and muons
 // This function loop could be combined with the electron one above for speed.
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removeTauMuonOverlap
+StatusCode OverlapRemovalTool::removeTauMuonOverlap
 (const xAOD::TauJetContainer* taus, const xAOD::MuonContainer* muons)
 {
   // Remove tau if overlaps with a muon in dR < 0.2
@@ -247,12 +253,13 @@ void OverlapRemovalTool::removeTauMuonOverlap
       setOutputDecoration(tau, tauPass);
     } // is surviving tau
   } // tau loop
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping photons and electrons
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removePhotonEleOverlap
+StatusCode OverlapRemovalTool::removePhotonEleOverlap
 (const xAOD::PhotonContainer* photons, const xAOD::ElectronContainer* electrons)
 {
   for(const auto photon : *photons){
@@ -264,12 +271,13 @@ void OverlapRemovalTool::removePhotonEleOverlap
       else setObjectPass(photon);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping photons and muons
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removePhotonMuonOverlap
+StatusCode OverlapRemovalTool::removePhotonMuonOverlap
 (const xAOD::PhotonContainer* photons, const xAOD::MuonContainer* muons)
 {
   for(const auto photon : *photons){
@@ -281,12 +289,13 @@ void OverlapRemovalTool::removePhotonMuonOverlap
       else setObjectPass(photon);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping photons and electrons
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removePhotonPhotonOverlap
+StatusCode OverlapRemovalTool::removePhotonPhotonOverlap
 (const xAOD::PhotonContainer* photons)
 {
   for(const auto photon : *photons){
@@ -299,12 +308,13 @@ void OverlapRemovalTool::removePhotonPhotonOverlap
       else setObjectPass(photon);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 // Remove overlapping photons and jets
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::removePhotonJetOverlap
+StatusCode OverlapRemovalTool::removePhotonJetOverlap
 (const xAOD::PhotonContainer* photons, const xAOD::JetContainer* jets)
 {
   for(const auto jet : *jets){
@@ -316,6 +326,7 @@ void OverlapRemovalTool::removePhotonJetOverlap
       else setObjectPass(jet);
     }
   }
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
