@@ -76,18 +76,10 @@ StatusCode OverlapRemovalTool::removeEleJetOverlap
   for(const auto jet : *jets){
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
-      // TODO: migrate to generic overlap method here?
-      int jetPass = 1;
-      // Loop over electrons
-      for(const auto electron : *electrons){
-        // Check for overlap
-        // TODO: drop hardcoded cone in favor of member
-        if(isSurvivingObject(electron) && objectsOverlap(electron, jet, 0.2)){
-          jetPass = 0;
-          break;
-        }
-      }
-      setOutputDecoration(jet, jetPass);
+      // Use the generic OR method
+      if(objectOverlaps<xAOD::ElectronContainer>(jet, electrons, 0.2))
+        setObjectFail(jet);
+      else setObjectPass(jet);
     }
   }
   // Remove electrons that overlap with surviving jets in dR < 0.4.
@@ -95,17 +87,10 @@ StatusCode OverlapRemovalTool::removeEleJetOverlap
   for(const auto electron : *electrons){
     // Check that this electron passes the input selection
     if(isSurvivingObject(electron)){
-      // TODO: migrate to generic overlap method here?
-      int elePass = 1;
-      // Loop over jets
-      for(const auto jet : *jets){
-        // Check for overlap with surviving jets
-        if(isSurvivingObject(jet) && objectsOverlap(electron, jet, 0.4)) {
-          elePass = 0;
-          break;
-        }
-      }
-      setOutputDecoration(electron, elePass);
+      // Use the generic OR method
+      if(objectOverlaps<xAOD::JetContainer>(electron, jets, 0.4))
+        setObjectFail(electron);
+      else setObjectPass(electron);
     }
   }
   return StatusCode::SUCCESS;
@@ -127,22 +112,15 @@ StatusCode OverlapRemovalTool::removeMuonJetOverlap
   for(const auto jet : *jets){
     if(isSurvivingObject(jet)){
       int nTrk = nTrkAcc(*jet);
-      // TODO: migrate to generic overlap method here?
       // Loop over muons
       for(const auto muon : *muons){
         // Check for overlap
         if(isSurvivingObject(muon) && objectsOverlap(jet, muon, 0.4)){
-          // Toss muon
-          if(nTrk > 2){
-            setObjectFail(muon);
-            setObjectPass(jet);
-          }
-          // Toss jet
-          else{
-            setObjectFail(jet);
-            setObjectPass(muon);
-            break;
-          }
+          bool keepJet = nTrk > 2;
+          setOutputDecoration(jet, keepJet);
+          setOutputDecoration(muon, !keepJet);
+          // Move on to next jet if we're tossing it
+          if(!keepJet) break;
         } // objects overlap
       } // muon loop
     } // is surviving jet
@@ -188,16 +166,9 @@ StatusCode OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* 
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
       // TODO: migrate to generic overlap method here?
-      int jetPass = 1;
-      // Loop over taus
-      for(const auto tau : *taus){
-        // Check for overlap
-        if(isSurvivingObject(tau) && objectsOverlap(tau, jet, 0.2)){
-          jetPass = 0;
-          break;
-        }
-      }
-      setOutputDecoration(jet, jetPass);
+      if(objectOverlaps<xAOD::TauJetContainer>(jet, taus, 0.2))
+        setObjectFail(jet);
+      else setObjectPass(jet);
     }
   }
   return StatusCode::SUCCESS;

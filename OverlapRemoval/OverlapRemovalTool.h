@@ -110,6 +110,7 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Generic dR-based overlap check between one object and a container.
     /// NOTE: this doesn't have any check that the objects are equal.
     /// TODO: decide if generic overlap function is worth it.
+    /// TODO: can I just use DataVector inheritance here???
     template<typename ContainerType> bool objectOverlaps
     (const xAOD::IParticle* obj, const ContainerType* container, double dR)
     {
