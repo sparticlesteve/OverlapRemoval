@@ -168,6 +168,27 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Output object decoration which specifies passing objects
     std::string m_outputLabel;
 
+    /// electron-jet overlap cone (removes electron)
+    float m_electronJetDR;
+    /// jet-electron overlap cone (removes jet)
+    float m_jetElectronDR;
+    /// muon-jet overlap cone
+    float m_muonJetDR;
+    /// tau-jet overlap cone
+    float m_tauJetDR;
+    /// tau-electron overlap cone
+    float m_tauElectronDR;
+    /// tau-muon overlap cone
+    float m_tauMuonDR;
+    /// photon-electron overlap cone
+    float m_photonElectronDR;
+    /// photon-muon overlap cone
+    float m_photonMuonDR;
+    /// photon-photon overlap cone
+    float m_photonPhotonDR;
+    /// photon-jet overlap cone
+    float m_photonJetDR;
+
 }; // class OverlapRemovalTool
 
 #endif

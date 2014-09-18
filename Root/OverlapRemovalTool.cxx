@@ -10,9 +10,20 @@
 OverlapRemovalTool::OverlapRemovalTool(const std::string& name)
         : asg::AsgTool(name)
 {
-  // declare configurable properties here
+  // input/output labels
   declareProperty("InputLabel", m_inputLabel = "selected");
   declareProperty("OutputLabel", m_outputLabel = "passesOR");
+  // dR cones for defining overlap
+  declareProperty("ElectronJetDRCone",    m_electronJetDR    = 0.2);
+  declareProperty("JetElectronDRCone",    m_jetElectronDR    = 0.4);
+  declareProperty("MuonJetDRCone",        m_muonJetDR        = 0.4);
+  declareProperty("TauJetDRCone",         m_tauJetDR         = 0.2);
+  declareProperty("TauElectronDRCone",    m_tauElectronDR    = 0.2);
+  declareProperty("TauMuonDRCone",        m_tauMuonDR        = 0.2);
+  declareProperty("PhotonElectronDRCone", m_photonElectronDR = 0.4);
+  declareProperty("PhotonMuonDRCone",     m_photonMuonDR     = 0.4);
+  declareProperty("PhotonPhotonDRCone",   m_photonPhotonDR   = 0.4);
+  declareProperty("PhotonJetDRCone",      m_photonJetDR      = 0.4);
 }
 
 //-----------------------------------------------------------------------------
@@ -77,7 +88,7 @@ StatusCode OverlapRemovalTool::removeEleJetOverlap
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
       // Use the generic OR method
-      if(objectOverlaps<xAOD::ElectronContainer>(jet, electrons, 0.2))
+      if(objectOverlaps<xAOD::ElectronContainer>(jet, electrons, m_electronJetDR))
         setObjectFail(jet);
       else setObjectPass(jet);
     }
@@ -88,7 +99,7 @@ StatusCode OverlapRemovalTool::removeEleJetOverlap
     // Check that this electron passes the input selection
     if(isSurvivingObject(electron)){
       // Use the generic OR method
-      if(objectOverlaps<xAOD::JetContainer>(electron, jets, 0.4))
+      if(objectOverlaps<xAOD::JetContainer>(electron, jets, m_jetElectronDR))
         setObjectFail(electron);
       else setObjectPass(electron);
     }
@@ -115,7 +126,7 @@ StatusCode OverlapRemovalTool::removeMuonJetOverlap
       // Loop over muons
       for(const auto muon : *muons){
         // Check for overlap
-        if(isSurvivingObject(muon) && objectsOverlap(jet, muon, 0.4)){
+        if(isSurvivingObject(muon) && objectsOverlap(jet, muon, m_muonJetDR)){
           bool keepJet = nTrk > 2;
           setOutputDecoration(jet, keepJet);
           setOutputDecoration(muon, !keepJet);
@@ -166,7 +177,7 @@ StatusCode OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* 
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
       // TODO: migrate to generic overlap method here?
-      if(objectOverlaps<xAOD::TauJetContainer>(jet, taus, 0.2))
+      if(objectOverlaps<xAOD::TauJetContainer>(jet, taus, m_tauJetDR))
         setObjectFail(jet);
       else setObjectPass(jet);
     }
@@ -190,7 +201,7 @@ StatusCode OverlapRemovalTool::removeTauEleOverlap
           // TODO: check ID string
           bool passID = false;
           electron->passSelection(passID, "VeryLooseLH");
-          if(passID && objectsOverlap(tau, electron, 0.2)){
+          if(passID && objectsOverlap(tau, electron, m_tauElectronDR)){
             tauPass = 0;
             break;
           } // electron overlaps
@@ -216,7 +227,7 @@ StatusCode OverlapRemovalTool::removeTauMuonOverlap
       int tauPass = 1;
       for(const auto muon : *muons){
         // No specific criteria on this muon?
-        if(isSurvivingObject(muon) && objectsOverlap(tau, muon, 0.2)){
+        if(isSurvivingObject(muon) && objectsOverlap(tau, muon, m_tauMuonDR)){
           tauPass = 0;
           break;
         } // muon overlaps
@@ -237,7 +248,7 @@ StatusCode OverlapRemovalTool::removePhotonEleOverlap
     if(isSurvivingObject(photon)){
       // This generic template method makes the code concise,
       // but is it now overly complicated? Need to decide.
-      if(objectOverlaps<xAOD::ElectronContainer>(photon, electrons, 0.4))
+      if(objectOverlaps<xAOD::ElectronContainer>(photon, electrons, m_photonElectronDR))
         setObjectFail(photon);
       else setObjectPass(photon);
     }
@@ -255,7 +266,7 @@ StatusCode OverlapRemovalTool::removePhotonMuonOverlap
     if(isSurvivingObject(photon)){
       // This generic template method makes the code concise,
       // but is it now overly complicated? Need to decide.
-      if(objectOverlaps<xAOD::MuonContainer>(photon, muons, 0.4))
+      if(objectOverlaps<xAOD::MuonContainer>(photon, muons, m_photonMuonDR))
         setObjectFail(photon);
       else setObjectPass(photon);
     }
@@ -274,7 +285,7 @@ StatusCode OverlapRemovalTool::removePhotonPhotonOverlap
       // This generic template method makes the code concise,
       // but is it now overly complicated? Need to decide.
       // TODO: what is the correct overlap cone here?
-      if(objectOverlaps<xAOD::PhotonContainer>(photon, photons, 0.4))
+      if(objectOverlaps<xAOD::PhotonContainer>(photon, photons, m_photonPhotonDR))
         setObjectFail(photon);
       else setObjectPass(photon);
     }
@@ -292,7 +303,7 @@ StatusCode OverlapRemovalTool::removePhotonJetOverlap
     if(isSurvivingObject(jet)){
       // This generic template method makes the code concise,
       // but is it now overly complicated? Need to decide.
-      if(objectOverlaps<xAOD::PhotonContainer>(jet, photons, 0.4))
+      if(objectOverlaps<xAOD::PhotonContainer>(jet, photons, m_photonJetDR))
         setObjectFail(jet);
       else setObjectPass(jet);
     }
