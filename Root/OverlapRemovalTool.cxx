@@ -45,6 +45,19 @@ removeOverlaps(const xAOD::ElectronContainer* electrons,
                const xAOD::TauJetContainer* taus,
                const xAOD::PhotonContainer* photons)
 {
+  return removeOverlaps(electrons, muons, jets, taus,
+                        electrons, muons, photons);
+}
+//-----------------------------------------------------------------------------
+StatusCode OverlapRemovalTool::
+removeOverlaps(const xAOD::ElectronContainer* electrons,
+               const xAOD::MuonContainer* muons,
+               const xAOD::JetContainer* jets,
+               const xAOD::TauJetContainer* taus,
+               const xAOD::ElectronContainer* looseElectrons,
+               const xAOD::MuonContainer* looseMuons,
+               const xAOD::PhotonContainer* photons)
+{
   /*
     Recommended removal sequence
 
@@ -57,8 +70,8 @@ removeOverlaps(const xAOD::ElectronContainer* electrons,
 
   // Tau and loose ele/mu OR
   if(taus){
-    ATH_CHECK( removeTauEleOverlap(taus, electrons) );
-    ATH_CHECK( removeTauMuonOverlap(taus, muons) );
+    ATH_CHECK( removeTauEleOverlap(taus, looseElectrons) );
+    ATH_CHECK( removeTauMuonOverlap(taus, looseMuons) );
   }
   // e-mu OR
   ATH_CHECK( removeEleMuonOverlap(electrons, muons) );

@@ -48,16 +48,31 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// @name Methods implementing the IOverlapRemovalTool interface
     /// @{
 
-    // TODO: decide on best method to pass additional loose electron/muon
-    // containers for the tau-lep OR in case the user is using view containers
+    // TODO: add better documentation about the loose ele/mu requirements.
 
     /// Top-level method for performing full overlap-removal.
-    /// the individual OR methods will be called in the recommended order,
+    /// The individual OR methods will be called in the recommended order,
     /// and the considered objects will be decorated with the output result.
+    /// Use this method form when the electron and muon containers are
+    /// sufficiently loose for the tau-lep overlap removal.
     virtual StatusCode removeOverlaps(const xAOD::ElectronContainer* electrons,
                                       const xAOD::MuonContainer* muons,
                                       const xAOD::JetContainer* jets,
                                       const xAOD::TauJetContainer* taus = 0,
+                                      const xAOD::PhotonContainer* photons = 0);
+
+    /// Top-level method for performing full overlap-removal.
+    /// The individual OR methods will be called in the recommended order,
+    /// and the considered objects will be decorated with the output result.
+    /// Use this method form when you're using view-containers or subset
+    /// containers in order to provide the loose electrons and muons for the
+    /// tau-lep overlap removal.
+    virtual StatusCode removeOverlaps(const xAOD::ElectronContainer* electrons,
+                                      const xAOD::MuonContainer* muons,
+                                      const xAOD::JetContainer* jets,
+                                      const xAOD::TauJetContainer* taus,
+                                      const xAOD::ElectronContainer* looseElectrons,
+                                      const xAOD::MuonContainer* looseMuons,
                                       const xAOD::PhotonContainer* photons = 0);
 
     /// Remove overlapping electrons and jets
