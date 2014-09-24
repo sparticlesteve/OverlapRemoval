@@ -143,7 +143,7 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
 
     /// Determine if objects overlap by a simple dR comparison
     bool objectsOverlap(const xAOD::IParticle* p1, const xAOD::IParticle* p2,
-                        double dRMax, double dRMin = -1.);
+                        double dRMax, double dRMin = 0);
 
     /// Recommended calculation of overlap distance parameter, (delta R)^2.
     /// dR^2 = (y1-y2)^2 + (phi1-phi2)^2
