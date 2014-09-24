@@ -164,15 +164,18 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     { return isInputObject(obj) && !isRejectedObject(obj); }
 
     /// Set output decoration on object, pass or fail
-    void setOutputDecoration(const xAOD::IParticle* obj, int pass);
+    void setOverlapDecoration(const xAOD::IParticle* obj, int overlaps);
+    //void setOutputDecoration(const xAOD::IParticle* obj, int pass);
 
     /// Shorthand way to set an object as pass
     void setObjectPass(const xAOD::IParticle* obj)
-    { setOutputDecoration(obj, 1); }
+    { setOverlapDecoration(obj, 0); }
+    //{ setOutputDecoration(obj, 1); }
 
     /// Shorthand way to set an object as fail
     void setObjectFail(const xAOD::IParticle* obj)
-    { setOutputDecoration(obj, 0); }
+    { setOverlapDecoration(obj, 1); }
+    //{ setOutputDecoration(obj, 0); }
 
   private:
 
@@ -183,7 +186,9 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     /// Input object decoration which specifies which objects to look at
     std::string m_inputLabel;
     /// Output object decoration which specifies passing objects
-    std::string m_outputLabel;
+    //std::string m_outputLabel;
+    /// Output object decoration which specifies overlapping objects
+    std::string m_overlapLabel;
 
     /// electron-jet overlap cone (removes electron)
     float m_electronJetDR;

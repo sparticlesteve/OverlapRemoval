@@ -12,7 +12,9 @@ OverlapRemovalTool::OverlapRemovalTool(const std::string& name)
 {
   // input/output labels
   declareProperty("InputLabel", m_inputLabel = "selected");
-  declareProperty("OutputLabel", m_outputLabel = "passesOR");
+  //declareProperty("OutputLabel", m_outputLabel = "passesOR");
+  declareProperty("OverlapLabel", m_overlapLabel = "overlaps",
+                  "Decoration given to objects that fail OR");
   // dR cones for defining overlap
   declareProperty("ElectronJetDRCone",    m_electronJetDR    = 0.2);
   declareProperty("JetElectronDRCone",    m_jetElectronDR    = 0.4);
@@ -142,14 +144,22 @@ StatusCode OverlapRemovalTool::removeMuonJetOverlap
       // Loop over muons
       for(const auto muon : *muons){
         // Check for overlap
-        if(isSurvivingObject(muon) && objectsOverlap(jet, muon, m_muonJetDR)){
-          bool keepJet = nTrk > 2;
-          setOutputDecoration(jet, keepJet);
-          setOutputDecoration(muon, !keepJet);
-          // Move on to next jet if we're tossing it
-          if(!keepJet) break;
-        } // objects overlap
+        if(isSurvivingObject(muon)){
+          if(objectsOverlap(jet, muon, m_muonJetDR)){
+            bool tossMuon = nTrk > 2;
+            setOverlapDecoration(muon, tossMuon);
+            setOverlapDecoration(jet, !tossMuon);
+            //setOutputDecoration(jet, keepJet);
+            //setOutputDecoration(muon, !keepJet);
+            // Move on to next jet if we're tossing it
+            if(!tossMuon) break;
+          } // objects overlap
+          // muon passes
+          setObjectPass(muon);
+        } // is surviving muon
       } // muon loop
+      // if still surviving, mark jet as pass
+      if(isSurvivingObject(jet)) setObjectPass(jet);
     } // is surviving jet
   } // jet loop
   return StatusCode::SUCCESS;
@@ -164,7 +174,8 @@ StatusCode OverlapRemovalTool::removeEleMuonOverlap
   // Loop over electrons
   for(const auto electron : *electrons){
     if(isSurvivingObject(electron)){
-      int elePass = 1;
+      int eleOverlaps = 0;
+      //int elePass = 1;
       const xAOD::TrackParticle* elTrk = electron->trackParticle();
       // Loop over muons
       for(const auto muon : *muons){
@@ -172,11 +183,13 @@ StatusCode OverlapRemovalTool::removeEleMuonOverlap
           muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
         // Discard electron if they share an ID track
         if(isSurvivingObject(muon) && (elTrk == muTrk)){
-          elePass = 0;
+          eleOverlaps = 1;
+          //elePass = 0;
           break;
         }
       }
-      setOutputDecoration(electron, elePass);
+      setOverlapDecoration(electron, eleOverlaps);
+      //setOutputDecoration(electron, elePass);
     }
   }
   return StatusCode::SUCCESS;
@@ -192,7 +205,6 @@ StatusCode OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* 
   for(const auto jet : *jets){
     // Check that this jet passes the input selection
     if(isSurvivingObject(jet)){
-      // TODO: migrate to generic overlap method here?
       if(objectOverlaps<xAOD::TauJetContainer>(jet, taus, m_tauJetDR))
         setObjectFail(jet);
       else setObjectPass(jet);
@@ -210,7 +222,8 @@ StatusCode OverlapRemovalTool::removeTauEleOverlap
   // Remove tau if overlaps with a VeryLooseLLH electron in dR < 0.2
   for(const auto tau : *taus){
     if(isSurvivingObject(tau)){
-      int tauPass = 1;
+      int tauOverlaps = 0;
+      //int tauPass = 1;
       for(const auto electron : *electrons){
         if(isSurvivingObject(electron)){
           // TODO: use faster method. This is slow.
@@ -218,12 +231,14 @@ StatusCode OverlapRemovalTool::removeTauEleOverlap
           bool passID = false;
           electron->passSelection(passID, "VeryLooseLH");
           if(passID && objectsOverlap(tau, electron, m_tauElectronDR)){
-            tauPass = 0;
+            tauOverlaps = 1;
+            //tauPass = 0;
             break;
           } // electron overlaps
         } // is surviving electron
       } // electron loop
-      setOutputDecoration(tau, tauPass);
+      setOverlapDecoration(tau, tauOverlaps);
+      //setOutputDecoration(tau, tauPass);
     } // is surviving tau
   } // tau loop
   return StatusCode::SUCCESS;
@@ -239,16 +254,19 @@ StatusCode OverlapRemovalTool::removeTauMuonOverlap
   // Remove tau if overlaps with a muon in dR < 0.2
   for(const auto tau : *taus){
     if(isSurvivingObject(tau)){
-      // TODO: migrate to generic overlap method here?
-      int tauPass = 1;
+      int tauOverlaps = 0;
+      //int tauPass = 1;
       for(const auto muon : *muons){
         // No specific criteria on this muon?
+        // TODO: get clarification on this
         if(isSurvivingObject(muon) && objectsOverlap(tau, muon, m_tauMuonDR)){
-          tauPass = 0;
+          tauOverlaps = 1;
+          //tauPass = 0;
           break;
         } // muon overlaps
       } // muon loop
-      setOutputDecoration(tau, tauPass);
+      setOverlapDecoration(tau, tauOverlaps);
+      //setOutputDecoration(tau, tauPass);
     } // is surviving tau
   } // tau loop
   return StatusCode::SUCCESS;
@@ -371,19 +389,42 @@ bool OverlapRemovalTool::isInputObject(const xAOD::IParticle* obj)
 //-----------------------------------------------------------------------------
 bool OverlapRemovalTool::isRejectedObject(const xAOD::IParticle* obj)
 {
-  static SG::AuxElement::ConstAccessor<int> passAcc(m_outputLabel);
-  if(passAcc.isAvailable(*obj) && passAcc(*obj) == 0){
+  // Reversing the logic
+  static SG::AuxElement::Decorator<int> overlapDec(m_overlapLabel);
+  if(overlapDec(*obj) == 1) return true;
+  //static SG::AuxElement::Accessor<int> overlapAcc(m_overlapLabel);
+  //if(overlapAcc.isAvailable(*obj) && overlapAcc(*obj) == 1)
+  //  return true;
+  /*
+  static SG::AuxElement::Accessor<int> passAcc(m_outputLabel);
+  //static SG::AuxElement::Decorator<int> passAcc(m_outputLabel);
+  if(passAcc.isAvailable(*obj)){
+    std::cout << "decoration is available" << std::endl;
+    if(passAcc(*obj) == 0){
+      std::cout << "decoration is FAIL" << std::endl;
+      return true;
+    }
+  }*/
+  /*if(passAcc.isAvailable(*obj) && passAcc(*obj) == 0){
     return true;
-  }
+  }*/
   return false;
 }
 
 //-----------------------------------------------------------------------------
 // Set output decoration on object
 //-----------------------------------------------------------------------------
-void OverlapRemovalTool::setOutputDecoration(const xAOD::IParticle* obj,
+/*void OverlapRemovalTool::setOutputDecoration(const xAOD::IParticle* obj,
                                              int pass)
 {
   static SG::AuxElement::Decorator<int> passAcc(m_outputLabel);
   passAcc(*obj) = pass;
+}*/
+//-----------------------------------------------------------------------------
+void OverlapRemovalTool::setOverlapDecoration(const xAOD::IParticle* obj,
+                                              int overlaps)
+{
+  static SG::AuxElement::Decorator<int> overlapDec(m_overlapLabel);
+  overlapDec(*obj) = overlaps;
 }
+
