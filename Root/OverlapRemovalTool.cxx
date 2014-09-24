@@ -28,7 +28,7 @@ OverlapRemovalTool::OverlapRemovalTool(const std::string& name)
   declareProperty("PhotonJetDRCone",      m_photonJetDR      = 0.4);
 
   // Selection properties
-  // TODO: fix this with correct VeryLooseLH key.
+  // TODO: figure out how to apply VeryLooseLH
   declareProperty("TauElectronOverlapID", m_tauEleOverlapID = "Loose",
                   "Electron ID selection for tau-ele OR");
 }
