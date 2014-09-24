@@ -83,9 +83,9 @@ removeOverlaps(const xAOD::ElectronContainer* electrons,
   // e-mu OR
   ATH_CHECK( removeEleMuonOverlap(electrons, muons) );
   // photon and e/mu OR
-  // TODO: where does photon-photon fit in?
   if(photons){
-    ATH_CHECK( removePhotonPhotonOverlap(photons) );
+    // TODO: find out where pho-pho OR fits in
+    //ATH_CHECK( removePhotonPhotonOverlap(photons) );
     ATH_CHECK( removePhotonEleOverlap(photons, electrons) );
     ATH_CHECK( removePhotonMuonOverlap(photons, muons) );
   }
@@ -265,8 +265,7 @@ StatusCode OverlapRemovalTool::removeTauMuonOverlap
       int tauOverlaps = 0;
       //int tauPass = 1;
       for(const auto muon : *muons){
-        // No specific criteria on this muon?
-        // TODO: get clarification on this
+        // TODO: update the loose muon criteria
         if(isSurvivingObject(muon) && objectsOverlap(tau, muon, m_tauMuonDR)){
           tauOverlaps = 1;
           //tauPass = 0;
