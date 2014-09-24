@@ -26,6 +26,11 @@ OverlapRemovalTool::OverlapRemovalTool(const std::string& name)
   declareProperty("PhotonMuonDRCone",     m_photonMuonDR     = 0.4);
   declareProperty("PhotonPhotonDRCone",   m_photonPhotonDR   = 0.4);
   declareProperty("PhotonJetDRCone",      m_photonJetDR      = 0.4);
+
+  // Selection properties
+  // TODO: fix this with correct VeryLooseLH key.
+  declareProperty("TauElectronOverlapID", m_tauEleOverlapID = "Loose",
+                  "Electron ID selection for tau-ele OR");
 }
 
 //-----------------------------------------------------------------------------
@@ -219,7 +224,7 @@ StatusCode OverlapRemovalTool::removeTauJetOverlap(const xAOD::TauJetContainer* 
 StatusCode OverlapRemovalTool::removeTauEleOverlap
 (const xAOD::TauJetContainer* taus, const xAOD::ElectronContainer* electrons)
 {
-  // Remove tau if overlaps with a VeryLooseLLH electron in dR < 0.2
+  // Remove tau if overlaps with a loose electron in dR < 0.2
   for(const auto tau : *taus){
     if(isSurvivingObject(tau)){
       int tauOverlaps = 0;
@@ -227,9 +232,12 @@ StatusCode OverlapRemovalTool::removeTauEleOverlap
       for(const auto electron : *electrons){
         if(isSurvivingObject(electron)){
           // TODO: use faster method. This is slow.
-          // TODO: check ID string
           bool passID = false;
-          electron->passSelection(passID, "VeryLooseLH");
+          if(!electron->passSelection(passID, m_tauEleOverlapID)){
+            ATH_MSG_ERROR("Electron ID for tau-ele OR not available: "
+                          << m_tauEleOverlapID);
+            return StatusCode::FAILURE;
+          }
           if(passID && objectsOverlap(tau, electron, m_tauElectronDR)){
             tauOverlaps = 1;
             //tauPass = 0;

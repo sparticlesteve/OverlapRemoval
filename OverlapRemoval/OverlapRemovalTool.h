@@ -179,9 +179,9 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
 
   private:
 
-    /// TODO: add configurable properties for
-    /// - all OR parameters (dR, etc.)
-    /// - all OR scheme choices
+    //
+    // Configurable properties
+    //
 
     /// Input object decoration which specifies which objects to look at
     std::string m_inputLabel;
@@ -210,6 +210,9 @@ class OverlapRemovalTool : public virtual IOverlapRemovalTool,
     float m_photonPhotonDR;
     /// photon-jet overlap cone
     float m_photonJetDR;
+
+    /// Electron ID selection for tau-ele OR
+    std::string m_tauEleOverlapID;
 
 }; // class OverlapRemovalTool
 
