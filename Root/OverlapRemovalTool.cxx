@@ -129,13 +129,16 @@ StatusCode OverlapRemovalTool::removeMuonJetOverlap
 (const xAOD::MuonContainer* muons, const xAOD::JetContainer* jets)
 {
   // Accessor to jet.nTrack
-  // TODO: figure out the correct aux key
-  static SG::AuxElement::ConstAccessor<int> nTrkAcc("numTracks");
+  // Is there any faster way to access this information?
+  std::vector<int> nTrkVec;
+  //static SG::AuxElement::ConstAccessor<int> nTrkAcc("NumTrkPt1000");
 
   // Loop over jets
   for(const auto jet : *jets){
     if(isSurvivingObject(jet)){
-      int nTrk = nTrkAcc(*jet);
+      //int nTrk = nTrkAcc(*jet);
+      jet->getAttribute(xAOD::JetAttribute::NumTrkPt500, nTrkVec);
+      int nTrk = nTrkVec[0];
       // Loop over muons
       for(const auto muon : *muons){
         // Check for overlap
